@@ -1,0 +1,39 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Product {
+  id          Int            @id @default(autoincrement())
+  name        String         // اسم المنتج (مثال: ترنج رجالي قطن)
+  category    String         // رجالي / أطفال / ملابس داخلية
+  fabricType  String?        // نوع القماش (مثال: غطس متبطن فرو)
+  code        String         @unique
+  variants    StockVariant[]
+  createdAt   DateTime       @default(now())
+}
+
+model StockVariant {
+  id        Int        @id @default(autoincrement())
+  productId Int
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size      String     // المقاس: 6, 8, 10... أو L, XL, 2XL, 3XL
+  color     String     // اللون
+  quantity  Int        @default(0) // الكمية بالمخزن
+  costPrice Float      // سعر التكلفة
+  sellPrice Float      // سعر البيع
+  sales     SalesLog[]
+}
+
+model SalesLog {
+  id             Int          @id @default(autoincrement())
+  stockVariantId Int
+  stockVariant   StockVariant @relation(fields: [stockVariantId], references: [id])
+  quantitySold   Int
+  totalPrice     Float
+  soldAt         DateTime     @default(now())
+}
